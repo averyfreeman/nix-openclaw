@@ -72,6 +72,13 @@
         runtimePluginPackageOutputs = pkgs.lib.mapAttrs' (
           id: package: pkgs.lib.nameValuePair "openclaw-runtime-plugin-${id}" package
         ) packageSetStable.openclawRuntimePlugins;
+        openclawTool = pkgs.buildGoModule {
+          pname = "openclaw-tool";
+          version = "0.1.0";
+          src = ./.;
+          subPackages = [ "cmd/openclaw-tool" ];
+          vendorHash = null;
+        };
       in
       {
         formatter = pkgs.nixfmt-tree.override {
@@ -84,6 +91,7 @@
           (builtins.removeAttrs packageSetStable [ "openclawRuntimePlugins" ])
           // {
             default = packageSetStable.openclaw;
+            openclaw-tool = openclawTool;
           }
           // runtimePluginPackageOutputs;
 
@@ -235,8 +243,11 @@
             pkgs.git
             pkgs.nixfmt-tree
             pkgs.nil
+            pkgs.go
           ];
         };
+
+        apps.openclaw-tool = flake-utils.lib.mkApp { drv = openclawTool; };
       }
     )
     // {
