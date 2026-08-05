@@ -28,9 +28,11 @@
       qmd,
     }:
     let
-      openclawToolPkgsFor = system: import ./nix/tools/packages.nix {
-        pkgs = import nixpkgs { inherit system; };
-      };
+      openclawToolPkgsFor =
+        system:
+        import ./nix/tools/packages.nix {
+          pkgs = import nixpkgs { inherit system; };
+        };
       qmdPkgsFor =
         system:
         if qmd ? packages && builtins.hasAttr system qmd.packages then qmd.packages.${system} else { };
@@ -45,7 +47,7 @@
         "x86_64-linux"
         "aarch64-darwin"
         "aarch64-linux"
-        ];
+      ];
     in
     flake-utils.lib.eachSystem systems (
       system:
@@ -106,6 +108,7 @@
                 includeSourceOverrideChecks = true;
               };
               workspace-materializer = pkgs.callPackage ./nix/checks/openclaw-workspace-materializer.nix { };
+              seed-files = pkgs.callPackage ./nix/checks/openclaw-seed-files.nix { };
               config-validity = pkgs.callPackage ./nix/checks/openclaw-config-validity.nix {
                 openclawGateway = packageSetStable.openclaw-gateway;
                 includeRuntimePluginSmoke = false;
@@ -159,16 +162,15 @@
                   ];
                 }).activationPackage;
             };
-            packageArtifactPaths =
-              [
-                packageSetStable.openclaw
-                packageSetStable.openclaw-gateway
-                stableChecks.bin-surface
-                stableChecks.package-contents
-              ]
-              ++ pkgs.lib.optionals (packageSetStable ? openclaw-app && packageSetStable.openclaw-app != null) [
-                packageSetStable.openclaw-app
-              ];
+            packageArtifactPaths = [
+              packageSetStable.openclaw
+              packageSetStable.openclaw-gateway
+              stableChecks.bin-surface
+              stableChecks.package-contents
+            ]
+            ++ pkgs.lib.optionals (packageSetStable ? openclaw-app && packageSetStable.openclaw-app != null) [
+              packageSetStable.openclaw-app
+            ];
             proofChecks = {
               # Product artifacts: user-facing package plus component packages
               # and content/surface checks that prove those artifacts are sane.

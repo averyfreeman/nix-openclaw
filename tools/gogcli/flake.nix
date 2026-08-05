@@ -6,31 +6,41 @@
     root.url = "../..";
   };
 
-  outputs = { self, nixpkgs, root }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      root,
+    }:
     let
       lib = nixpkgs.lib;
       systems = builtins.attrNames root.packages;
-      pluginFor = system:
+      pluginFor =
+        system:
         let
-          packagesForSystem = root.packages.${system} or {};
+          packagesForSystem = root.packages.${system} or { };
           gogcli = packagesForSystem.gogcli or null;
         in
-          if gogcli == null then null else {
+        if gogcli == null then
+          null
+        else
+          {
             name = "gogcli";
             skills = [ ./skills/gog ];
             packages = [ gogcli ];
             needs = {
-              stateDirs = [];
-              requiredEnv = [];
+              stateDirs = [ ];
+              requiredEnv = [ ];
             };
           };
-    in {
-      packages = lib.genAttrs systems (system:
+    in
+    {
+      packages = lib.genAttrs systems (
+        system:
         let
-          gogcli = (root.packages.${system} or {}).gogcli or null;
+          gogcli = (root.packages.${system} or { }).gogcli or null;
         in
-          if gogcli == null then {}
-          else { gogcli = gogcli; }
+        if gogcli == null then { } else { gogcli = gogcli; }
       );
 
       openclawPlugin = pluginFor;

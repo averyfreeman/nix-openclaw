@@ -6,31 +6,41 @@
     root.url = "../..";
   };
 
-  outputs = { self, nixpkgs, root }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      root,
+    }:
     let
       lib = nixpkgs.lib;
       systems = builtins.attrNames root.packages;
-      pluginFor = system:
+      pluginFor =
+        system:
         let
-          packagesForSystem = root.packages.${system} or {};
+          packagesForSystem = root.packages.${system} or { };
           sag = packagesForSystem.sag or null;
         in
-          if sag == null then null else {
+        if sag == null then
+          null
+        else
+          {
             name = "sag";
             skills = [ ./skills/sag ];
             packages = [ sag ];
             needs = {
-              stateDirs = [];
-              requiredEnv = [];
+              stateDirs = [ ];
+              requiredEnv = [ ];
             };
           };
-    in {
-      packages = lib.genAttrs systems (system:
+    in
+    {
+      packages = lib.genAttrs systems (
+        system:
         let
-          sag = (root.packages.${system} or {}).sag or null;
+          sag = (root.packages.${system} or { }).sag or null;
         in
-          if sag == null then {}
-          else { sag = sag; }
+        if sag == null then { } else { sag = sag; }
       );
 
       openclawPlugin = pluginFor;

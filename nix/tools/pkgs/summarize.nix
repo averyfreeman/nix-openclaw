@@ -1,16 +1,17 @@
-{ lib
-, stdenv
-, fetchurl
-, nodejs
-, pnpm
-, python3
-, python3Packages
-, pkg-config
-, makeWrapper
-, jq
-, git
-, pkgs
-, zstd
+{
+  lib,
+  stdenv,
+  fetchurl,
+  nodejs,
+  pnpm,
+  python3,
+  python3Packages,
+  pkg-config,
+  makeWrapper,
+  jq,
+  git,
+  pkgs,
+  zstd,
 }:
 
 let
@@ -32,25 +33,36 @@ let
     inherit pnpm;
   };
 
-  pnpmDeps = (pnpmFetchDepsPkg.fetchPnpmDeps {
-    pname = pname;
-    version = version;
-    src = src;
-    hash = "sha256-EGzR2+90IrfdS1mWtQgoVeWE+NIrHPO0lM04rHvYowQ=";
-    fetcherVersion = 3;
-  });
+  pnpmDeps = (
+    pnpmFetchDepsPkg.fetchPnpmDeps {
+      pname = pname;
+      version = version;
+      src = src;
+      hash = "sha256-EGzR2+90IrfdS1mWtQgoVeWE+NIrHPO0lM04rHvYowQ=";
+      fetcherVersion = 3;
+    }
+  );
 
   meta = with lib; {
     description = "Link → clean text → summary";
     homepage = "https://github.com/steipete/summarize";
     license = licenses.mit;
-    platforms = [ "aarch64-darwin" "x86_64-linux" "aarch64-linux" ];
+    platforms = [
+      "aarch64-darwin"
+      "x86_64-linux"
+      "aarch64-linux"
+    ];
     mainProgram = "summarize";
   };
 in
 if stdenv.isLinux then
   stdenv.mkDerivation {
-    inherit pname version src meta;
+    inherit
+      pname
+      version
+      src
+      meta
+      ;
 
     nativeBuildInputs = [
       nodejs

@@ -6,16 +6,25 @@
     root.url = "path:../..";
   };
 
-  outputs = { self, nixpkgs, root }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      root,
+    }:
     let
       lib = nixpkgs.lib;
       systems = builtins.attrNames root.packages;
-      pluginFor = system:
+      pluginFor =
+        system:
         let
-          packagesForSystem = root.packages.${system} or {};
+          packagesForSystem = root.packages.${system} or { };
           discrawl = packagesForSystem.discrawl or null;
         in
-          if discrawl == null then null else {
+        if discrawl == null then
+          null
+        else
+          {
             name = "discrawl";
             skills = [ ./skills/discrawl ];
             packages = [ discrawl ];
@@ -24,13 +33,14 @@
               requiredEnv = [ ];
             };
           };
-    in {
-      packages = lib.genAttrs systems (system:
+    in
+    {
+      packages = lib.genAttrs systems (
+        system:
         let
-          discrawl = (root.packages.${system} or {}).discrawl or null;
+          discrawl = (root.packages.${system} or { }).discrawl or null;
         in
-          if discrawl == null then {}
-          else { discrawl = discrawl; }
+        if discrawl == null then { } else { discrawl = discrawl; }
       );
 
       openclawPlugin = pluginFor;

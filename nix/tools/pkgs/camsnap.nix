@@ -1,4 +1,9 @@
-{ lib, stdenv, fetchurl, ffmpeg }:
+{
+  lib,
+  stdenv,
+  fetchurl,
+  ffmpeg,
+}:
 
 let
   sources = {

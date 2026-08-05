@@ -301,15 +301,19 @@ let
     in
     {
       homeFile = {
-        name = openclawLib.toRelative inst.configPath;
+        name = openclawLib.toRelative "${inst.configPath}.nix-seed";
         value = {
           source = configFile;
           text = builtins.unsafeDiscardStringContext configJson;
-          force = true;
         };
       };
+      resetConfigScript = pkgs.writeShellScriptBin "openclaw-reset-config-${name}" ''
+        exec ${../openclaw-reset-config.sh} ${lib.escapeShellArg configFile} ${lib.escapeShellArg inst.configPath}
+      '';
+      configSeedManifest = pkgs.writeText "openclaw-${name}-config-seed.tsv" "${configFile}\t${inst.configPath}\n";
       configFile = configFile;
       configPath = inst.configPath;
+      instanceName = name;
       codexRuntimeProfiles = codexRuntimeProfiles;
       runtimeProfile = runtimeProfile;
 
@@ -440,6 +444,15 @@ in
 
     home.file = lib.mkMerge [
       (lib.listToAttrs (map (item: item.homeFile) instanceConfigs))
+      (lib.listToAttrs (
+        map (item: {
+          name = ".local/bin/openclaw-reset-config-${item.instanceName}";
+          value = {
+            source = "${item.resetConfigScript}/bin/openclaw-reset-config-${item.instanceName}";
+            executable = true;
+          };
+        }) instanceConfigs
+      ))
       (lib.optionalAttrs (pkgs.stdenv.hostPlatform.isDarwin && appPackage != null && cfg.installApp) {
         "Applications/OpenClaw.app" = {
           source = "${appPackage}/Applications/OpenClaw.app";
@@ -467,14 +480,12 @@ in
     '';
 
     home.activation.openclawWorkspaceFiles = lib.hm.dag.entryAfter [ "openclawDirs" ] ''
-      run --quiet ${../openclaw-materialize-workspace-files.sh} ${lib.escapeShellArg "${homeDir}/.local/state/nix-openclaw/managed-workspace-files"} ${files.materializedManifest}
+      run --quiet ${../openclaw-seed-files.sh} ${files.materializedManifest}
     '';
 
     home.activation.openclawConfigFiles = lib.hm.dag.entryAfter [ "openclawDirs" ] ''
       ${lib.concatStringsSep "\n" (
-        map (
-          item: "run --quiet ${lib.getExe' pkgs.coreutils "ln"} -sfn ${item.configFile} ${item.configPath}"
-        ) instanceConfigs
+        map (item: "run --quiet ${../openclaw-seed-files.sh} ${item.configSeedManifest}") instanceConfigs
       )}
     '';
 

@@ -112,7 +112,7 @@ let
     specialArgs = { inherit pkgs; };
   };
 
-  configPathKey = ".openclaw/openclaw.json";
+  configPathKey = ".openclaw/openclaw.json.nix-seed";
   configFile = moduleEval.config.home.file."${configPathKey}".source;
   expectedWorkspace = "/tmp/openclaw-explicit-workspace";
 

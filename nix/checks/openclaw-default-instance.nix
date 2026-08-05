@@ -154,7 +154,7 @@ let
     path: lib.hasSuffix "/skill" path || lib.hasSuffix "-openclaw-plugin-skill-skill" path;
 
   defaultEval = moduleEval { };
-  defaultConfig = generatedConfig defaultEval ".openclaw/openclaw.json";
+  defaultConfig = generatedConfig defaultEval ".openclaw/openclaw.json.nix-seed";
   hasLinuxUnit = builtins.hasAttr "openclaw-gateway" defaultEval.config.systemd.user.services;
   hasDarwinAgent = builtins.hasAttr "com.steipete.openclaw.gateway" defaultEval.config.launchd.agents;
   defaultCheck = builtins.deepSeq (requireNoAssertionFailures "default instance" defaultEval) (
@@ -177,43 +177,44 @@ let
       gatewayPnpmDepsHash = lib.fakeHash;
     };
   };
-  sourceOverrideConfig = generatedConfig sourceOverrideEval ".openclaw-dev/openclaw.json";
-  sourceOverrideCheck = builtins.deepSeq (requireNoAssertionFailures "source override" sourceOverrideEval) (
-    if (((sourceOverrideConfig.gateway or { }).mode or null) != "local") then
-      throw "Source override instance lost gateway.mode."
-    else if pkgs.stdenv.hostPlatform.isLinux then
-      let
-        services = sourceOverrideEval.config.systemd.user.services;
-        execStart = services.openclaw-gateway-dev.Service.ExecStart or "";
-      in
-      if !(builtins.hasAttr "openclaw-gateway-dev" services) then
-        throw "Source override instance missing systemd unit."
-      else if !(lib.hasInfix "/bin/openclaw-gateway-dev gateway --port " execStart) then
-        throw "Source override instance did not wire the dev gateway wrapper."
-      else
-        "ok"
-    else if pkgs.stdenv.hostPlatform.isDarwin then
-      let
-        agents = sourceOverrideEval.config.launchd.agents;
-        programArgs =
-          agents."com.steipete.openclaw.gateway.dev".config.ProgramArguments or [ ];
-      in
-      if !(builtins.hasAttr "com.steipete.openclaw.gateway.dev" agents) then
-        throw "Source override instance missing launchd agent."
-      else if !(lib.any (arg: lib.hasSuffix "/bin/openclaw-gateway-dev" arg) programArgs) then
-        throw "Source override instance did not wire the dev gateway wrapper."
-      else
-        "ok"
-    else
-      "ok"
-  );
+  sourceOverrideConfig = generatedConfig sourceOverrideEval ".openclaw-dev/openclaw.json.nix-seed";
+  sourceOverrideCheck =
+    builtins.deepSeq (requireNoAssertionFailures "source override" sourceOverrideEval)
+      (
+        if (((sourceOverrideConfig.gateway or { }).mode or null) != "local") then
+          throw "Source override instance lost gateway.mode."
+        else if pkgs.stdenv.hostPlatform.isLinux then
+          let
+            services = sourceOverrideEval.config.systemd.user.services;
+            execStart = services.openclaw-gateway-dev.Service.ExecStart or "";
+          in
+          if !(builtins.hasAttr "openclaw-gateway-dev" services) then
+            throw "Source override instance missing systemd unit."
+          else if !(lib.hasInfix "/bin/openclaw-gateway-dev gateway --port " execStart) then
+            throw "Source override instance did not wire the dev gateway wrapper."
+          else
+            "ok"
+        else if pkgs.stdenv.hostPlatform.isDarwin then
+          let
+            agents = sourceOverrideEval.config.launchd.agents;
+            programArgs = agents."com.steipete.openclaw.gateway.dev".config.ProgramArguments or [ ];
+          in
+          if !(builtins.hasAttr "com.steipete.openclaw.gateway.dev" agents) then
+            throw "Source override instance missing launchd agent."
+          else if !(lib.any (arg: lib.hasSuffix "/bin/openclaw-gateway-dev" arg) programArgs) then
+            throw "Source override instance did not wire the dev gateway wrapper."
+          else
+            "ok"
+        else
+          "ok"
+      );
 
   customPluginEval = moduleEval {
     customPlugins = [
       { source = alphaPluginSource; }
     ];
   };
-  customPluginConfig = generatedConfig customPluginEval ".openclaw/openclaw.json";
+  customPluginConfig = generatedConfig customPluginEval ".openclaw/openclaw.json.nix-seed";
   customPluginSkillExtraDirs = ((customPluginConfig.skills or { }).load or { }).extraDirs or [ ];
   customPluginCheck = builtins.deepSeq (requireNoAssertionFailures "customPlugins" customPluginEval) (
     if !(lib.any isPluginSkillPath customPluginSkillExtraDirs) then
@@ -237,7 +238,7 @@ let
       }
     ];
   };
-  multiAgentPluginSkillConfig = generatedConfig multiAgentPluginSkillEval ".openclaw/openclaw.json";
+  multiAgentPluginSkillConfig = generatedConfig multiAgentPluginSkillEval ".openclaw/openclaw.json.nix-seed";
   multiAgentPluginSkillExtraDirs = (
     ((multiAgentPluginSkillConfig.skills or { }).load or { }).extraDirs or [ ]
   );
@@ -295,7 +296,7 @@ let
       }
     ];
   };
-  userSkillConfig = generatedConfig userSkillEval ".openclaw/openclaw.json";
+  userSkillConfig = generatedConfig userSkillEval ".openclaw/openclaw.json.nix-seed";
   userSkillExtraDirs = ((userSkillConfig.skills or { }).load or { }).extraDirs or [ ];
   generatedUserSkillExtraDirs = lib.filter (path: path != "/tmp/user-skill-root") userSkillExtraDirs;
   userSkillCheck = builtins.deepSeq (requireNoAssertionFailures "user skills" userSkillEval) (
@@ -326,7 +327,7 @@ let
   };
   workspaceBootstrapConfig = builtins.fromJSON (
     builtins.unsafeDiscardStringContext
-      workspaceBootstrapEval.config.home.file.".openclaw/openclaw.json".text
+      workspaceBootstrapEval.config.home.file.".openclaw/openclaw.json.nix-seed".text
   );
   workspaceBootstrapCheck =
     builtins.deepSeq (requireNoAssertionFailures "workspace bootstrap files" workspaceBootstrapEval)
@@ -413,7 +414,7 @@ let
       mode = "json";
     };
   };
-  secretProviderConfig = generatedConfig secretProviderEval ".openclaw/openclaw.json";
+  secretProviderConfig = generatedConfig secretProviderEval ".openclaw/openclaw.json.nix-seed";
   secretProviderCheck =
     builtins.deepSeq (requireNoAssertionFailures "secrets.providers" secretProviderEval)
       (
@@ -480,7 +481,7 @@ let
       };
     };
   };
-  secretRefPassthroughConfig = generatedConfig secretRefPassthroughEval ".openclaw/openclaw.json";
+  secretRefPassthroughConfig = generatedConfig secretRefPassthroughEval ".openclaw/openclaw.json.nix-seed";
   secretRefGroqApiKey =
     ((secretRefPassthroughConfig.models or { }).providers or { }).groq.apiKey or { };
   secretRefFileApiKey =
@@ -555,7 +556,7 @@ let
     runtimePlugins = [ "slack" ];
     config.plugins.allow = [ "memory-core" ];
   };
-  runtimePluginConfig = generatedConfig runtimePluginEval ".openclaw/openclaw.json";
+  runtimePluginConfig = generatedConfig runtimePluginEval ".openclaw/openclaw.json.nix-seed";
   runtimePluginLoadPaths = ((runtimePluginConfig.plugins or { }).load or { }).paths or [ ];
   runtimePluginEntry = ((runtimePluginConfig.plugins or { }).entries or { }).slack or { };
   runtimePluginAllow = ((runtimePluginConfig.plugins or { }).allow or [ ]);
@@ -605,7 +606,7 @@ let
       "discord"
     ];
   };
-  runtimePluginCatalogGeneratedConfig = generatedConfig runtimePluginCatalogGeneratedEval ".openclaw/openclaw.json";
+  runtimePluginCatalogGeneratedConfig = generatedConfig runtimePluginCatalogGeneratedEval ".openclaw/openclaw.json.nix-seed";
   runtimePluginCatalogGeneratedLoadPaths =
     ((runtimePluginCatalogGeneratedConfig.plugins or { }).load or { }).paths or [ ];
   runtimePluginCatalogGeneratedEntries = (
@@ -643,8 +644,8 @@ let
       "diagnostics-prometheus"
     ];
   };
-  runtimePluginInstanceOneConfig = generatedConfig runtimePluginInstanceEval ".openclaw-one/openclaw.json";
-  runtimePluginInstanceTwoConfig = generatedConfig runtimePluginInstanceEval ".openclaw-two/openclaw.json";
+  runtimePluginInstanceOneConfig = generatedConfig runtimePluginInstanceEval ".openclaw-one/openclaw.json.nix-seed";
+  runtimePluginInstanceTwoConfig = generatedConfig runtimePluginInstanceEval ".openclaw-two/openclaw.json.nix-seed";
   runtimePluginInstanceOneLoadPaths =
     ((runtimePluginInstanceOneConfig.plugins or { }).load or { }).paths or [ ];
   runtimePluginInstanceTwoLoadPaths =
@@ -736,7 +737,7 @@ let
     ];
     config.plugins.allow = [ "memory-core" ];
   };
-  runtimePluginSourceConfig = generatedConfig runtimePluginSourceEval ".openclaw/openclaw.json";
+  runtimePluginSourceConfig = generatedConfig runtimePluginSourceEval ".openclaw/openclaw.json.nix-seed";
   runtimePluginSourceLoadPaths =
     ((runtimePluginSourceConfig.plugins or { }).load or { }).paths or [ ];
   runtimePluginSourceEntry =
@@ -841,7 +842,7 @@ let
     ];
   };
   npmRuntimePluginCheck = requireEvalFailure "npm customPlugins bridge" (
-    npmRuntimePluginEval.config.home.file.".openclaw/openclaw.json".text
+    npmRuntimePluginEval.config.home.file.".openclaw/openclaw.json.nix-seed".text
   );
 
   checkKey = builtins.deepSeq (

@@ -8,8 +8,7 @@
 }:
 
 let
-  useNpmPackage =
-    gatewaySrc == null && sourceInfo ? gatewayNpmDepsHash && bundledAcpx != null;
+  useNpmPackage = gatewaySrc == null && sourceInfo ? gatewayNpmDepsHash && bundledAcpx != null;
 in
 if useNpmPackage then
   callPackage ./openclaw-gateway-npm.nix {

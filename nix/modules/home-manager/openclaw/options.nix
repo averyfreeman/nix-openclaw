@@ -202,13 +202,13 @@ in
       bootstrapFiles = lib.mkOption {
         type = lib.types.nullOr bootstrapFilesOptionType;
         default = null;
-        description = "Explicit Nix-managed OpenClaw workspace bootstrap files. These files are materialized into each workspace as AGENTS.md, SOUL.md, TOOLS.md, IDENTITY.md, USER.md, and optional HEARTBEAT.md, and are replaced on activation.";
+        description = "Initial OpenClaw workspace bootstrap files. These files are copied only when absent; the resulting workspace remains user- and runtime-owned.";
       };
 
       files = lib.mkOption {
         type = lib.types.attrsOf lib.types.path;
         default = { };
-        description = "Extra Nix-managed workspace files. These are copied into each workspace but are not OpenClaw bootstrap files and are not injected automatically by upstream OpenClaw.";
+        description = "Initial workspace files. These are copied only when absent and are not injected automatically by upstream OpenClaw.";
       };
     };
 
