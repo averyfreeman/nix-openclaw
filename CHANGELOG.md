@@ -8,6 +8,41 @@ This changelog starts with the current pre-1.0 nix-openclaw Home Manager module
 API transition.
 Older repository history is available in git.
 
+## 2026-08-05
+
+### Summary
+
+- Merged the former `nix-openclaw-tools` repository into this tree. Tool
+  packages now live under `nix/tools`, while their OpenClaw adapters remain
+  under `tools/`.
+- Removed the external tools flake input and consolidated the package,
+  workflow, Go automation, and skill-sync surfaces.
+- Added the `openclaw-tool` scaffold generator for Git repositories and exact
+  npm packages. It emits a local flake, Nix package expression, skill, and
+  `openclawPlugin` output.
+- Changed Home Manager runtime ownership to seed-once behavior. OpenClaw
+  configuration and workspace files are no longer replaced on every
+  activation.
+- Added per-instance `openclaw-reset-config-*` helpers with timestamped
+  backups.
+- Changed the documented defaults to `$HOME/.openclaw` and
+  `$HOME/.openclaw/workspace`, outside any Nix checkout.
+
+### Current tools
+
+The built-in runtime toolchain is: `nodejs_22`, `pnpm`, `git`, `curl`, `jq`,
+`python3`, `ffmpeg`, `sox`, and `ripgrep`.
+
+The packaged OpenClaw tools are: `summarize`, `discrawl`, `wacrawl`, `gogcli`,
+`goplaces`, `camsnap`, `sonoscli`, `peekaboo`, `poltergeist`, `sag`, `imsg`,
+and `qmd`. Availability remains platform-filtered.
+
+### Pin status
+
+The requested `nixpkgs` 26.11 ref is not published yet. The flake remains on
+the existing `nixos-unstable` lock so it stays evaluable; `flake.nix` contains
+the explicit 26.11 TODO and must be updated when that release ref exists.
+
 ## 2026-06-06
 
 ### Changed

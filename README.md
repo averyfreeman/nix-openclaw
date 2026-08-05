@@ -371,7 +371,7 @@ Reference the README and templates/agent-first/flake.nix in the repo for the mod
 Your agent should do the setup work. You answer its short questions and confirm before it sends messages or changes external services.
 
 QMD packaging note for agents: Linux uses upstream `github:tobi/qmd`; Darwin
-uses the `nix-openclaw-tools` QMD repair package until upstream Darwin packaging
+uses the unified nix-openclaw QMD repair package until upstream Darwin packaging
 is fixed. Keep both pinned to the same QMD release unless there is a tested
 reason to diverge.
 
@@ -469,7 +469,20 @@ When you run `home-manager switch`:
 4. A launchd (macOS) or systemd user service (Linux) is created/updated to run the gateway
 5. The gateway starts, loads skills, connects to your providers
 
-All state lives in `~/.openclaw/`. Logs at `/tmp/openclaw/openclaw-gateway.log`.
+All state lives in `$HOME/.openclaw/`; the default workspace is
+`$HOME/.openclaw/workspace`. Logs are written to `/tmp/openclaw/openclaw-gateway.log`.
+
+### Mutable runtime configuration
+
+Home Manager installs the OpenClaw package and generates a seed configuration,
+but it does not replace an existing runtime configuration on every switch.
+Configuration and workspace files are copied only when absent, then remain
+owned by OpenClaw and the user. This keeps installation reproducible without
+making the ecosystem's runtime configuration immutable.
+
+Each enabled instance installs an explicit reset helper such as
+`openclaw-reset-config-default`. It backs up the current JSON under
+`$HOME/.openclaw/.backups/` before applying the current Nix-generated seed.
 
 </details>
 
@@ -535,6 +548,27 @@ customPlugins = [
 ```
 
 Then run `home-manager switch` to install.
+
+### Build your own tool
+
+The unified flake includes an `openclaw-tool` scaffold generator. It accepts a
+Git repository or an exact npm package version and creates a local flake that
+exports the standard `openclawPlugin` contract:
+
+```bash
+nix run github:openclaw/nix-openclaw#openclaw-tool -- \
+  init https://github.com/example/my-cli.git \
+  --output ./my-cli-openclaw --kind go
+
+nix run github:openclaw/nix-openclaw#openclaw-tool -- \
+  init @example/my-cli@1.2.3 \
+  --output ./my-cli-openclaw --kind npm
+```
+
+Replace the generated `lib.fakeHash` values and adjust `package.nix` for the
+upstream build layout. Then add the generated flake through
+`programs.openclaw.customPlugins`. Tool installation remains immutable; tool
+state and configuration live outside the Nix store.
 
 ### Plugins with configuration
 
@@ -1024,7 +1058,7 @@ home-manager switch --rollback  # revert
 
 ### Local memory
 
-QMD is the supported local memory backend when OpenClaw config opts into it. The default `openclaw` package does not build or install QMD unless `memory.backend = "qmd"` is set. Linux uses upstream `tobi/qmd`; Darwin uses the repaired `nix-openclaw-tools` package until upstream QMD is fixed there.
+QMD is the supported local memory backend when OpenClaw config opts into it. The default `openclaw` package does not build or install QMD unless `memory.backend = "qmd"` is set. Linux uses upstream `tobi/qmd`; Darwin uses the unified nix-openclaw QMD package until upstream QMD is fixed there.
 
 Opt in through normal OpenClaw config:
 
@@ -1071,7 +1105,7 @@ The default `openclaw` package uses these tools internally and does not expose t
 
 **Local memory**: QMD, pulled in only when `memory.backend = "qmd"` is set
 
-**Default first-party tools** come from `nix-openclaw-tools`: gogcli (`gog`), goplaces, summarize, camsnap, sonoscli.
+**Default first-party tools** come from the unified tree: gogcli (`gog`), goplaces, summarize, camsnap, sonoscli.
 
 **Optional bundled plugins** add their own packages when enabled: discrawl, wacrawl, peekaboo, poltergeist, sag, imsg.
 
