@@ -9,11 +9,11 @@
   };
 
   inputs = {
+    # TODO: switch to github:NixOS/nixpkgs/nixos-26.11 when that release ref exists.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    nix-openclaw-tools.url = "github:openclaw/nix-openclaw-tools";
     qmd.url = "github:tobi/qmd/v2.1.0";
     qmd.inputs.flake-utils.follows = "flake-utils";
     qmd.inputs.nixpkgs.follows = "nixpkgs";
@@ -25,16 +25,12 @@
       nixpkgs,
       flake-utils,
       home-manager,
-      nix-openclaw-tools,
       qmd,
     }:
     let
-      openclawToolPkgsFor =
-        system:
-        if nix-openclaw-tools ? packages && builtins.hasAttr system nix-openclaw-tools.packages then
-          nix-openclaw-tools.packages.${system}
-        else
-          { };
+      openclawToolPkgsFor = system: import ./nix/tools/packages.nix {
+        pkgs = import nixpkgs { inherit system; };
+      };
       qmdPkgsFor =
         system:
         if qmd ? packages && builtins.hasAttr system qmd.packages then qmd.packages.${system} else { };
@@ -48,7 +44,8 @@
       systems = [
         "x86_64-linux"
         "aarch64-darwin"
-      ];
+        "aarch64-linux"
+        ];
     in
     flake-utils.lib.eachSystem systems (
       system:
