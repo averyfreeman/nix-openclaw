@@ -32,42 +32,37 @@ Here's the site describing the original project for adherents to the socially ac
 #### Situational synopsis:
 ---
 
-1. OpenClaw binaries cannot currently self-update independently. Nix places them in /nix/store, and Home Manager/flake updates remain authoritative. Runtime configuration is mutable, but installation is not.
+1. Issue Maintaining OpenClaw with Nix: **OpenClaw cannot self-update.** This can seem untenable, since the cadence of releases is so rapid, many users experience edge cases that require frequent patching, and so on.
 
-Recommended self-update design:
+**Solution:** Design an installation policy where direct self-update not possible, but still managed by Nix.
 
-  - Keep Nix as the base runtime.
-  - Install versioned OpenClaw releases under $HOME/.openclaw/releases.
-  - Maintain a mutable current symlink.
-  - Add staged update, smoke testing, rollback, and opt-in switching.
-  - Add an agentic changelog checker that compares release notes against installed plugins, skills, ACP servers, config schema,
-    and runtime dependencies.
+  - Nix Home Manager installs versioned releases of OpenClaw install under `$HOME/.openclaw/releases`.
+  - Release version is selected by using a symlink to `releases/current` folder.
+  - Installation tooling stages updates, performs smoke tests, provides rollbacks if necessary, and offers non-destructive version migration.
+  - Agentic changelog checker compares release notes against installed plugins, skills, ACP servers, config schema, and dependencies.
 
-  - Treat the agent as a compatibility/risk assessor, not an automatic authority.
+This way, OpenClaw acts as both a risk assessor and a reserved salesperson touting a beyond-generous return policy, rather than an obvlious decapod steamroller.
 
-2. In official `nix-openclaw` (and almost all Nix packages), direct mutations are intentionally blocked. This can be really frustrating for ecosystems that have lots of plugins and other add-ons, and for codebases that progress at a breathtaking cadence.  
+2. Issues using an immutable OpenClaw: In official `nix-openclaw` (and Nix packages, by design), direct mutations are intentionally blocked. This can be really frustrating for ecosystems that have lots of plugins and other add-ons, and for codebases that progress at a breathtaking cadence.  
 
-In _Invertebrate Jailbreak_, version, declarative skills can be managed through Nix/Home Manager, but outside that mode OpenClaw’s own mutable ecosystem can manage plugins, skills, and ACP servers independently, as well.
+**Solution:** In _Invertebrate Jailbreak Edition_, OpenClaw’s ecosystem remains mutable like a traditional installation. Users can manage plugins, skills, and ACP servers independently, as well. One can still use declarative skills curated by the Nix-Openclaw ecosystem, and managed through Nix/Home Manager, but outside that mode other plugins are available, as well. 
 
 More flexible tool strategy separates:
   - Nix-managed base packages and trusted plugins.
-  - Mutable user-managed extensions under $HOME/.openclaw/tools or $HOME/.openclaw/extensions.
-  - A registry recording source, version, enabled state, and optional lock information.
-  - Git/npm/local/ClawHub installation sources.
-  - Inventory and compatibility checks across both managed and mutable tools.
+  - Mutable user-managed extensions under `$HOME/.openclaw/tools` or `$HOME/.openclaw/extensions`.
+  - A registry recording source, version, enabled state, and optional lock info.
+  - Access to sources such as `Git`/`npm`/`local`/`ClawHub`.
+  - Inventory and compatibility checks offered for managed _and_ mutable plugins!
 
-  Changelog:
+#### Opt-In to Self-Update:
 
-## How to Opt-in self-update
-
-The default launcher remains Nix-managed. To let OpenClaw releases update
-outside the flake, enable the personal mutable channel:
+Declare in Home Manager as usual using modified flake, and enable the **mutable channel:**
 
 ```nix
 programs.openclaw.selfUpdate.enable = true;
 ```
 
-After Home Manager activation, use:
+After Home Manager installs with above directive, use new included command:
 
 ```bash
 openclaw-self-update status
@@ -78,9 +73,6 @@ openclaw-self-update switch 2026.7.1
 openclaw-self-update rollback
 ```
 
-Releases live under `$HOME/.openclaw/releases`; configuration and workspace
-state remain in their normal mutable locations. Staging does not activate a
-release, and switching is explicit. If no mutable release is active, the
-gateway falls back to the Nix package.
+Staging does not activate a release, so switching is explicit. If no mutable release is active, the gateway falls back to the Nix package.
 
-See Changelog for more details
+See Changelog for more details.
