@@ -97,6 +97,7 @@
 
         apps = {
           openclaw = flake-utils.lib.mkApp { drv = packageSetStable.openclaw; };
+          openclaw-self-update = flake-utils.lib.mkApp { drv = packageSetStable.openclaw-self-update; };
         };
 
         checks =

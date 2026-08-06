@@ -159,7 +159,7 @@ let
         denyList = existingDenyList;
         nixOpenClawPluginIds = [ ];
       };
-      disablePersistedPluginRegistry = runtimePluginConfig.loadPaths != [ ];
+      disablePersistedPluginRegistry = runtimePluginConfig.loadPaths != [ ] && !cfg.selfUpdate.enable;
       generatedPluginConfig = lib.recursiveUpdate (lib.optionalAttrs
         (runtimePluginConfig.loadPaths != [ ])
         {
@@ -276,12 +276,20 @@ let
           ) runtimeEnvAll
         )}
 
-        exec "${gatewayRuntimePackage}/bin/openclaw" "$@"
+        exec "${if cfg.selfUpdate.enable then selfUpdateScript else "${gatewayRuntimePackage}/bin/openclaw"}" "$@"
+      '';
+      selfUpdateCommandName = if name == "default" then "openclaw-self-update" else "openclaw-self-update-${name}";
+      selfUpdateScript = pkgs.writeShellScriptBin selfUpdateCommandName ''
+        set -euo pipefail
+        export PATH="${pkgs.nodejs}/bin:$PATH"
+        export OPENCLAW_SELF_UPDATE_ROOT=${lib.escapeShellArg inst.stateDir}
+        export OPENCLAW_SELF_UPDATE_FALLBACK=${lib.escapeShellArg "${gatewayRuntimePackage}/bin/openclaw"}
+        exec ${pkgs."openclaw-self-update"}/bin/openclaw-self-update "$@"
       '';
       appDefaults = lib.optionalAttrs (pkgs.stdenv.hostPlatform.isDarwin && inst.appDefaults.enable) {
         attachExistingOnly = inst.appDefaults.attachExistingOnly;
         gatewayPort = inst.gatewayPort;
-        nixMode = inst.appDefaults.nixMode;
+        nixMode = inst.appDefaults.nixMode && !cfg.selfUpdate.enable;
       };
 
       appInstall =
@@ -344,6 +352,8 @@ let
               OPENCLAW_CONFIG_PATH = inst.configPath;
               OPENCLAW_STATE_DIR = inst.stateDir;
               OPENCLAW_IMAGE_BACKEND = "sips";
+            }
+            // lib.optionalAttrs (!cfg.selfUpdate.enable) {
               OPENCLAW_NIX_MODE = "1";
             }
             // lib.optionalAttrs disablePersistedPluginRegistry {
@@ -367,8 +377,8 @@ let
               "HOME=${homeDir}"
               "OPENCLAW_CONFIG_PATH=${inst.configPath}"
               "OPENCLAW_STATE_DIR=${inst.stateDir}"
-              "OPENCLAW_NIX_MODE=1"
             ]
+            ++ lib.optional (!cfg.selfUpdate.enable) "OPENCLAW_NIX_MODE=1"
             ++ lib.optional disablePersistedPluginRegistry "OPENCLAW_DISABLE_PERSISTED_PLUGIN_REGISTRY=1";
             StandardOutput = "append:${inst.logPath}";
             StandardError = "append:${inst.logPath}";
@@ -379,6 +389,7 @@ let
       appDefaults = appDefaults;
       appInstall = appInstall;
       package = package;
+      selfUpdateScript = selfUpdateScript;
       qmdEnabled = qmdEnabled;
       runtimePluginPackages = runtimePluginConfig.packages;
       assertions = runtimePluginConfig.assertions ++ bootstrapAssertions;
@@ -439,6 +450,7 @@ in
 
     home.packages = lib.unique (
       (map (item: item.package) instanceConfigs)
+      ++ (lib.optionals cfg.selfUpdate.enable (map (item: item.selfUpdateScript) instanceConfigs))
       ++ (lib.optionals cfg.exposePluginPackages plugins.pluginPackagesAll)
     );
 

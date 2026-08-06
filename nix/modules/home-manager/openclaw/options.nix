@@ -150,6 +150,24 @@ in
   options.programs.openclaw = {
     enable = lib.mkEnableOption "OpenClaw (batteries-included)";
 
+    selfUpdate = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Use the mutable OpenClaw release channel under stateDir instead of the default Nix-only launcher.";
+      };
+      channel = lib.mkOption {
+        type = lib.types.enum [ "stable" ];
+        default = "stable";
+        description = "Mutable OpenClaw release channel. Only stable releases are supported currently.";
+      };
+      approval = lib.mkOption {
+        type = lib.types.enum [ "review" ];
+        default = "review";
+        description = "Require explicit review and switch commands before activating a staged mutable release.";
+      };
+    };
+
     package = lib.mkOption {
       type = lib.types.package;
       default = pkgs.openclaw;

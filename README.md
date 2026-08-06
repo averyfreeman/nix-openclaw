@@ -41,3 +41,28 @@ Here's the site describing the original project for adherents to the socially ac
   - Inventory and compatibility checks across both managed and mutable tools.
 
   Changelog:
+
+## Opt-in self-update
+
+The default launcher remains Nix-managed. To let OpenClaw releases update
+outside the flake, enable the personal mutable channel:
+
+```nix
+programs.openclaw.selfUpdate.enable = true;
+```
+
+After Home Manager activation, use:
+
+```bash
+openclaw-self-update status
+openclaw-self-update check
+openclaw-self-update review 2026.7.1
+openclaw-self-update stage 2026.7.1
+openclaw-self-update switch 2026.7.1
+openclaw-self-update rollback
+```
+
+Releases live under `$HOME/.openclaw/releases`; configuration and workspace
+state remain in their normal mutable locations. Staging does not activate a
+release, and switching is explicit. If no mutable release is active, the
+gateway falls back to the Nix package.

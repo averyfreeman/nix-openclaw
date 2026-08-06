@@ -292,3 +292,13 @@ programs.openclaw.workspace.files."LORE.md" = ./workspace/LORE.md;
 # Private module.
 programs.openclaw.workspace.bootstrapFiles.user = ./workspace/USER.md;
 ```
+## 2026-08-05
+
+- Added an opt-in mutable OpenClaw release channel through Home Manager.
+- Added `openclaw-self-update` with release checking, GitHub changelog review,
+  staged npm installation, explicit switching, status, and rollback.
+- Mutable mode keeps releases under `$HOME/.openclaw/releases`, clears the
+  Nix-only runtime guards for the selected release, and falls back to the Nix
+  package until a mutable release is switched on.
+- Added a validated fork-tagging policy and CI workflow. Fork tags use
+  `v<major>.<minor>.<patch>` and are distinct from mirrored upstream tags.

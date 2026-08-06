@@ -42,6 +42,13 @@ let
     extendedTools = toolSets.tools;
     version = sourceInfo.releaseVersion or null;
   };
+  openclawSelfUpdate = pkgs.buildGoModule {
+    pname = "openclaw-self-update";
+    version = "0.1.0";
+    src = ../../.;
+    subPackages = [ "cmd/openclaw-self-update" ];
+    vendorHash = null;
+  };
 in
 {
   inherit pnpm_11;
@@ -49,5 +56,6 @@ in
   qmd = qmdPackage;
   openclaw-gateway = openclawGateway;
   openclaw = openclawBundle;
+  openclaw-self-update = openclawSelfUpdate;
 }
 // (if isDarwin then { openclaw-app = openclawApp; } else { })

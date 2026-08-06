@@ -170,6 +170,27 @@ let
       "ok"
   );
 
+  mutableEval = moduleEval { selfUpdate.enable = true; };
+  mutableCheck = builtins.deepSeq (requireNoAssertionFailures "mutable self-update instance" mutableEval) (
+    let
+      services = mutableEval.config.systemd.user.services;
+      agents = mutableEval.config.launchd.agents;
+      service = services.openclaw-gateway.Service or { };
+      agent = agents."com.steipete.openclaw.gateway".config or { };
+      serviceEnvironment = service.Environment or [ ];
+      agentEnvironment = agent.EnvironmentVariables or { };
+      hasSelfUpdatePackage = lib.any (package: lib.getName package == "openclaw-self-update") mutableEval.config.home.packages;
+    in
+    if lib.hasInfix "OPENCLAW_NIX_MODE=1" (lib.concatStringsSep " " serviceEnvironment)
+      || (agentEnvironment ? OPENCLAW_NIX_MODE)
+    then
+      throw "Mutable self-update mode still enables OPENCLAW_NIX_MODE."
+    else if !hasSelfUpdatePackage then
+      throw "Mutable self-update mode did not install the mutable launcher."
+    else
+      "ok"
+  );
+
   sourceOverrideEval = moduleEval {
     instances.dev = {
       enable = true;
@@ -848,6 +869,7 @@ let
   checkKey = builtins.deepSeq (
     [
       defaultCheck
+      mutableCheck
       userSkillCheck
       workspaceBootstrapCheck
       documentsRemovedCheck
