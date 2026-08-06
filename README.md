@@ -1,8 +1,8 @@
-<--! % prefer front matter not to render %
+<!-- % prefer front matter not to render %
 ---
 Title: Nix-OpenClaw Invertebrate Outbreak Edition
-author: Avery Freeman
-version: 0.1.1
+Author: Avery Freeman
+Version: see tagged commits 
 tags:
   - OpenClaw
   - AI_Assistant
