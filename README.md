@@ -1,3 +1,4 @@
+<--! % prefer front matter not to render %
 ---
 Title: Nix-OpenClaw Invertebrate Outbreak Edition
 author: Avery Freeman
@@ -8,8 +9,8 @@ tags:
   - Nix
   - TypeScript
   - npm_packages
----
-
+--- 
+-->
 <div align="center">
   <h1>Invertebrate Outbreak</h1>
   <h3>[ The Self-Immolating Sequel of the Nix-OpenClaw Story ]</h3>
