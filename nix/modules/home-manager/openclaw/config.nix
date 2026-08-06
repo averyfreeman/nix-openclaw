@@ -286,6 +286,14 @@ let
         export OPENCLAW_SELF_UPDATE_FALLBACK=${lib.escapeShellArg "${gatewayRuntimePackage}/bin/openclaw"}
         exec ${pkgs."openclaw-self-update"}/bin/openclaw-self-update "$@"
       '';
+      selfUpdatePackage = pkgs.symlinkJoin {
+        name = "openclaw-self-update-${name}";
+        paths = [ gatewayRuntimePackage selfUpdateScript ];
+        postBuild = ''
+          rm -f "$out/bin/openclaw"
+          ln -s "${selfUpdateScript}/bin/${selfUpdateCommandName}" "$out/bin/openclaw"
+        '';
+      };
       appDefaults = lib.optionalAttrs (pkgs.stdenv.hostPlatform.isDarwin && inst.appDefaults.enable) {
         attachExistingOnly = inst.appDefaults.attachExistingOnly;
         gatewayPort = inst.gatewayPort;
@@ -390,6 +398,7 @@ let
       appInstall = appInstall;
       package = package;
       selfUpdateScript = selfUpdateScript;
+      selfUpdatePackage = selfUpdatePackage;
       qmdEnabled = qmdEnabled;
       runtimePluginPackages = runtimePluginConfig.packages;
       assertions = runtimePluginConfig.assertions ++ bootstrapAssertions;
@@ -449,8 +458,7 @@ in
     ];
 
     home.packages = lib.unique (
-      (map (item: item.package) instanceConfigs)
-      ++ (lib.optionals cfg.selfUpdate.enable (map (item: item.selfUpdateScript) instanceConfigs))
+      (map (item: if cfg.selfUpdate.enable then item.selfUpdatePackage else item.package) instanceConfigs)
       ++ (lib.optionals cfg.exposePluginPackages plugins.pluginPackagesAll)
     );
 

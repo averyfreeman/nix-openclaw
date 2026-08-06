@@ -179,7 +179,7 @@ let
       agent = agents."com.steipete.openclaw.gateway".config or { };
       serviceEnvironment = service.Environment or [ ];
       agentEnvironment = agent.EnvironmentVariables or { };
-      hasSelfUpdatePackage = lib.any (package: lib.getName package == "openclaw-self-update") mutableEval.config.home.packages;
+      hasSelfUpdatePackage = lib.any (package: lib.hasInfix "openclaw-self-update" (lib.getName package)) mutableEval.config.home.packages;
     in
     if lib.hasInfix "OPENCLAW_NIX_MODE=1" (lib.concatStringsSep " " serviceEnvironment)
       || (agentEnvironment ? OPENCLAW_NIX_MODE)
