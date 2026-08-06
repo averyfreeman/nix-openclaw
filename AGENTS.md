@@ -55,6 +55,15 @@ Source: https://github.com/orgs/openclaw/people
 - OpenClaw plugin loading belongs here: package supported OpenClaw catalog runtime plugin roots as Nix artifacts, expose generated outputs through package/check outputs for Garnix, and let host repos only enable/configure them.
 - Do not make host config run package-manager installs at runtime for the batteries-included path. Supported OpenClaw catalog runtime plugin ids use `programs.openclaw.runtimePlugins`; `customPlugins.source = "npm:..."` is not supported.
 
+## Fork Tagging Policy
+
+The fork's canonical tags use `v<major>.<minor>.<patch>` and are separate from
+mirrored upstream OpenClaw tags such as `v2026.7.1`. The fork baseline is
+`v0.0.0`; every validated `main` commit receives one immutable fork tag. Normal
+commits increment the patch component. Feature and breaking milestones may
+increment minor or major respectively. Use `scripts/tag-fork-commit.sh` for
+dry-runs and follow-up tagging; never move an existing fork tag.
+
 ## Packaging Defaults
 
 - Nix-first, no sudo.
