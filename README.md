@@ -10,11 +10,11 @@ tags:
   - npm_packages
 --- 
 <div align="center">
-# Invertebrate Outbreak
-### [ The Self-Immolating Sequel of the Nix-OpenClaw Story ]
----
-
-<img src="./docs/assets/chibi_lobster_does_Maine.png" alt="Chibi Lobster be chill, Maine" width="300" height="300" />
+  <h1>Invertebrate Outbreak</h1>
+  <h3>[ The Self-Immolating Sequel of the Nix-OpenClaw Story ]</h3>
+  <p>
+    <img src="./docs/assets/chibi_lobster_does_Maine.png" alt="Chibi Lobster be chill, Maine" width="300" height="300" />
+  </p>
 </div>
 
 This is a mostly personal project. It's a less locked-down variant of the original
