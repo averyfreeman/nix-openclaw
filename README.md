@@ -2,7 +2,9 @@
 ### [ The Self-Immolating Sequel of the Nix-OpenClaw Story ]
 ---
 
+<center>
 ![Chibi Lobster be chill, maine](./docs/assets/chibi_lobster_does_Maine.jpg)
+</center>
 
 This is a mostly personal project. It's a less locked-down variant of the original
 [openclaw/nix-openclaw](https://github.com/openclaw/nix-openclaw) project.
@@ -15,9 +17,10 @@ Here's the site describing the original project for adherents to the socially ac
 
 #### Situational synopsis:
 ---
-  1. OpenClaw binaries cannot currently self-update independently. Nix places them in /nix/store, and Home Manager/flake updates remain authoritative. Runtime configuration is mutable, but installation is not.
 
-  Recommended self-update design:
+1. OpenClaw binaries cannot currently self-update independently. Nix places them in /nix/store, and Home Manager/flake updates remain authoritative. Runtime configuration is mutable, but installation is not.
+
+Recommended self-update design:
 
   - Keep Nix as the base runtime.
   - Install versioned OpenClaw releases under $HOME/.openclaw/releases.
@@ -28,12 +31,11 @@ Here's the site describing the original project for adherents to the socially ac
 
   - Treat the agent as a compatibility/risk assessor, not an automatic authority.
 
-  2. In current Nix mode, direct plugin mutation commands are intentionally blocked. Plugins and declarative skills are managed
-     through Nix/Home Manager. Outside that mode, OpenClaw’s own mutable ecosystem can manage plugins, skills, and ACP servers
-     independently.
+2. In official `nix-openclaw` (and almost all Nix packages), direct mutations are intentionally blocked. This can be really frustrating for ecosystems that have lots of plugins and other add-ons, and for codebases that progress at a breathtaking cadence.  
 
-  A future tool strategy should separate:
+In _Invertebrate Jailbreak_, version, declarative skills can be managed through Nix/Home Manager, but outside that mode OpenClaw’s own mutable ecosystem can manage plugins, skills, and ACP servers independently, as well.
 
+More flexible tool strategy separates:
   - Nix-managed base packages and trusted plugins.
   - Mutable user-managed extensions under $HOME/.openclaw/tools or $HOME/.openclaw/extensions.
   - A registry recording source, version, enabled state, and optional lock information.
@@ -42,7 +44,7 @@ Here's the site describing the original project for adherents to the socially ac
 
   Changelog:
 
-## Opt-in self-update
+## How to Opt-in self-update
 
 The default launcher remains Nix-managed. To let OpenClaw releases update
 outside the flake, enable the personal mutable channel:
@@ -66,3 +68,5 @@ Releases live under `$HOME/.openclaw/releases`; configuration and workspace
 state remain in their normal mutable locations. Staging does not activate a
 release, and switching is explicit. If no mutable release is active, the
 gateway falls back to the Nix package.
+
+See Changelog for more details
