@@ -2,9 +2,9 @@
 ### [ The Self-Immolating Sequel of the Nix-OpenClaw Story ]
 ---
 
-<p align="center">
-![Chibi Lobster be chill, maine](./docs/assets/chibi_lobster_does_Maine.jpg){ width="600" height="600" style="display: block; margin: 0 auto;" }
-</p>
+<div align="center">
+<img src="./docs/assets/chibi_lobster_does_Maine.jpg" alt="Chibi Lobster be chill, Maine" width="600" height="600" />
+</div>
 
 This is a mostly personal project. It's a less locked-down variant of the original
 [openclaw/nix-openclaw](https://github.com/openclaw/nix-openclaw) project.
