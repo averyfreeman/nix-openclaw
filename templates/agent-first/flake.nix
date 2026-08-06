@@ -33,7 +33,7 @@
             home.username = "<user>";
             # REPLACE: /Users/<user> on macOS or /home/<user> on Linux
             home.homeDirectory = "<homeDir>";
-            home.stateVersion = "24.11";
+            home.stateVersion = "26.11";
             programs.home-manager.enable = true;
 
             programs.openclaw = {
