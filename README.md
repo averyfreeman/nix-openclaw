@@ -1,8 +1,19 @@
+---
+Title:
+author: Avery
+version: 0.1.1
+tags:
+  - OpenClaw
+  - AI_Assistant
+  - Nix
+  - TypeScript
+  - npm_packages
+--- 
+<div align="center">
 # Invertebrate Outbreak
 ### [ The Self-Immolating Sequel of the Nix-OpenClaw Story ]
 ---
 
-<div align="center">
 <img src="./docs/assets/chibi_lobster_does_Maine.png" alt="Chibi Lobster be chill, Maine" width="300" height="300" />
 </div>
 
