@@ -1,6 +1,6 @@
 ---
-Title:
-author: Avery
+Title: Nix-OpenClaw Invertebrate Outbreak Edition
+author: Avery Freeman
 version: 0.1.1
 tags:
   - OpenClaw
@@ -8,7 +8,8 @@ tags:
   - Nix
   - TypeScript
   - npm_packages
---- 
+---
+
 <div align="center">
   <h1>Invertebrate Outbreak</h1>
   <h3>[ The Self-Immolating Sequel of the Nix-OpenClaw Story ]</h3>
@@ -17,6 +18,7 @@ tags:
   </p>
 </div>
 
+---
 This is a mostly personal project. It's a less locked-down variant of the original
 [openclaw/nix-openclaw](https://github.com/openclaw/nix-openclaw) project.
 
