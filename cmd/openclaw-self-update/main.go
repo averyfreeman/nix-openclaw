@@ -24,6 +24,7 @@ type releaseReport struct {
 	PublishedAt   string   `json:"publishedAt,omitempty"`
 	Changelog     string   `json:"changelog,omitempty"`
 	InstalledTool []string `json:"installedTools,omitempty"`
+	SmokePassed   bool     `json:"smokePassed"`
 	Warnings      []string `json:"warnings,omitempty"`
 }
 
@@ -212,10 +213,29 @@ func stage(args []string) error {
 	if _, err := os.Stat(filepath.Join(tmp, "node_modules", ".bin", "openclaw")); err != nil {
 		return fmt.Errorf("installed source has no node_modules/.bin/openclaw: %w", err)
 	}
+	if err := smokeBinary(filepath.Join(tmp, "node_modules", ".bin", "openclaw")); err != nil {
+		return fmt.Errorf("release smoke check failed: %w", err)
+	}
 	if err := os.Rename(tmp, target); err != nil {
 		return err
 	}
 	fmt.Printf("staged OpenClaw release: %s\n", version)
+	return nil
+}
+
+func smokeRelease(root, version string) error {
+	return smokeBinary(filepath.Join(releasePath(root, version), "node_modules", ".bin", "openclaw"))
+}
+
+func smokeBinary(binary string) error {
+	command := exec.Command(binary, "--version")
+	output, err := command.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%w (%s)", err, strings.TrimSpace(string(output)))
+	}
+	if strings.TrimSpace(string(output)) == "" {
+		return errors.New("openclaw --version returned no output")
+	}
 	return nil
 }
 
@@ -261,6 +281,15 @@ func review(args []string) error {
 			"Review release notes and run smoke tests before switching.",
 			"NPM-installed releases are outside Nix reproducibility and require manual rollback planning.",
 		},
+	}
+	if _, err := os.Stat(filepath.Join(releasePath(updateRoot(), version), "node_modules", ".bin", "openclaw")); err == nil {
+		if err := smokeRelease(updateRoot(), version); err != nil {
+			report.Warnings = append(report.Warnings, "staged release smoke check failed: "+err.Error())
+		} else {
+			report.SmokePassed = true
+		}
+	} else {
+		report.Warnings = append(report.Warnings, "release is not staged; stage it before switching")
 	}
 	if body, err := fetchReleaseNotes(version); err == nil {
 		report.ReleaseName = body.Name
