@@ -3,7 +3,7 @@
 ---
 
 <div align="center">
-<img src="./docs/assets/chibi_lobster_does_Maine.jpg" alt="Chibi Lobster be chill, Maine" width="600" height="600" />
+<img src="./docs/assets/chibi_lobster_does_Maine.jpg" alt="Chibi Lobster be chill, Maine" width="300" height="300" />
 </div>
 
 This is a mostly personal project. It's a less locked-down variant of the original
